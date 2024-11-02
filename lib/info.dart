@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:provider/provider.dart';
+import 'providers/data_provider.dart';
 
 class Info extends StatelessWidget {
   const Info({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<DataProvider>(context);
+    
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -14,9 +18,9 @@ class Info extends StatelessWidget {
           children: [
             _buildHeaderSection(),
             const SizedBox(height: 25),
-            _buildPraktikumSection(),
+            _buildPraktikumSection(dataProvider.infoItems),
             const SizedBox(height: 25),
-            _buildInfoSection(),
+            _buildInfoSection(dataProvider.infoItems),
           ],
         ),
       ),
@@ -79,7 +83,7 @@ class Info extends StatelessWidget {
     );
   }
 
-  Widget _buildPraktikumSection() {
+  Widget _buildPraktikumSection(List<Map<String, String>> infoItems) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -95,36 +99,26 @@ class Info extends StatelessWidget {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: [
-              _buildPraktikumCard(
-                'Praktikum 1',
-                '9 September 2024',
-                'Lab Komputer 1',
-                Icons.computer,
-                Colors.blue,
-              ),
-              _buildPraktikumCard(
-                'Praktikum 2',
-                '10 September 2024',
-                'Lab Komputer 2',
-                Icons.computer,
-                Colors.purple,
-              ),
-              _buildPraktikumCard(
-                'Praktikum 3',
-                '11 September 2024',
-                'Lab Komputer 3',
-                Icons.computer,
-                Colors.green,
-              ),
-            ],
+            children: infoItems.map((item) => _buildPraktikumCard(
+              title: item['title'] ?? '',
+              date: item['date'] ?? '',
+              lab: 'Lab Komputer 1',
+              icon: Icons.computer,
+              color: Colors.blue,
+            )).toList(),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildPraktikumCard(String title, String date, String lab, IconData icon, Color color) {
+  Widget _buildPraktikumCard({
+    required String title,
+    required String date,
+    required String lab,
+    required IconData icon,
+    required Color color,
+  }) {
     return Container(
       width: 250,
       margin: EdgeInsets.only(right: 15),
@@ -178,7 +172,7 @@ class Info extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoSection() {
+  Widget _buildInfoSection(List<Map<String, String>> infoItems) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,18 +191,21 @@ class Info extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 15,
           crossAxisSpacing: 15,
-          children: [
-            _buildInfoCard('Peraturan Lab', Icons.rule_folder, Colors.orange),
-            _buildInfoCard('Materi', Icons.book, Colors.blue),
-            _buildInfoCard('Asisten', Icons.people, Colors.green),
-            _buildInfoCard('Nilai', Icons.grade, Colors.purple),
-          ],
+          children: infoItems.map((item) => _buildInfoCard(
+            title: item['title'] ?? '',
+            icon: Icons.rule_folder,
+            color: Colors.orange,
+          )).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildInfoCard(String title, IconData icon, Color color) {
+  Widget _buildInfoCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),

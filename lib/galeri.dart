@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:provider/provider.dart';
+import 'providers/data_provider.dart';
 
 class Gallery extends StatelessWidget {
   const Gallery({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<DataProvider>(context);
+    
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -16,7 +20,7 @@ class Gallery extends StatelessWidget {
             const SizedBox(height: 25),
             _buildFeaturedImage(),
             const SizedBox(height: 25),
-            _buildGalleryGrid(),
+            _buildGalleryGrid(dataProvider.galleryItems),
           ],
         ),
       ),
@@ -160,7 +164,7 @@ class Gallery extends StatelessWidget {
     );
   }
 
-  Widget _buildGalleryGrid() {
+  Widget _buildGalleryGrid(List<Map<String, String>> galleryItems) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -181,16 +185,25 @@ class Gallery extends StatelessWidget {
             crossAxisSpacing: 15,
             mainAxisSpacing: 15,
           ),
-          itemCount: 6, // Jumlah foto yang ingin ditampilkan
+          itemCount: galleryItems.length,
           itemBuilder: (context, index) {
-            return _buildGalleryItem(index);
+            final item = galleryItems[index];
+            return _buildGalleryItem(
+              index: index,
+              title: item['title'] ?? '',
+              date: item['date'] ?? '',
+            );
           },
         ),
       ],
     );
   }
 
-  Widget _buildGalleryItem(int index) {
+  Widget _buildGalleryItem({
+    required int index,
+    required String title,
+    required String date,
+  }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -232,13 +245,28 @@ class Gallery extends StatelessWidget {
                 Positioned(
                   bottom: 10,
                   left: 10,
-                  child: Text(
-                    'Foto ${index + 1}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  right: 10,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        date,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

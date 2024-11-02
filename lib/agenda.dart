@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:provider/provider.dart';
+import 'providers/data_provider.dart';
 
 class AgendaScreen extends StatelessWidget {
   const AgendaScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<DataProvider>(context);
+    
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -14,9 +18,9 @@ class AgendaScreen extends StatelessWidget {
           children: [
             _buildHeaderSection(),
             const SizedBox(height: 25),
-            _buildUpcomingExams(),
+            _buildUpcomingExams(dataProvider.agendaItems),
             const SizedBox(height: 25),
-            _buildAgendaTimeline(),
+            _buildAgendaTimeline(dataProvider.agendaItems),
           ],
         ),
       ),
@@ -79,7 +83,7 @@ class AgendaScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUpcomingExams() {
+  Widget _buildUpcomingExams(List<Map<String, String>> agendaItems) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -95,36 +99,26 @@ class AgendaScreen extends StatelessWidget {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: [
-              _buildExamCard(
-                'Ujian Pemrograman',
-                '9 September 2024',
-                'Lab Komputer 1',
-                Icons.code,
-                Colors.blue,
-              ),
-              _buildExamCard(
-                'Ujian Web Design',
-                '10 September 2024',
-                'Lab Komputer 2',
-                Icons.web,
-                Colors.green,
-              ),
-              _buildExamCard(
-                'Ujian Database',
-                '11 September 2024',
-                'Lab Komputer 3',
-                Icons.storage,
-                Colors.orange,
-              ),
-            ],
+            children: agendaItems.map((item) => _buildExamCard(
+              title: item['title'] ?? '',
+              date: item['date'] ?? '',
+              room: 'Lab Komputer 1',
+              icon: Icons.event,
+              color: Colors.blue,
+            )).toList(),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildExamCard(String title, String date, String room, IconData icon, Color color) {
+  Widget _buildExamCard({
+    required String title,
+    required String date,
+    required String room,
+    required IconData icon,
+    required Color color,
+  }) {
     return Container(
       width: 250,
       margin: EdgeInsets.only(right: 15),
@@ -190,7 +184,7 @@ class AgendaScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAgendaTimeline() {
+  Widget _buildAgendaTimeline(List<Map<String, String>> agendaItems) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -203,29 +197,22 @@ class AgendaScreen extends StatelessWidget {
           ),
         ),
         SizedBox(height: 15),
-        _buildTimelineItem(
-          'Pemrograman',
-          '9 September 2024',
-          '09:00 - 11:00',
-          Colors.blue,
-        ),
-        _buildTimelineItem(
-          'Web Design',
-          '10 September 2024',
-          '13:00 - 15:00',
-          Colors.green,
-        ),
-        _buildTimelineItem(
-          'Database',
-          '11 September 2024',
-          '10:00 - 12:00',
-          Colors.orange,
-        ),
+        ...agendaItems.map((item) => _buildTimelineItem(
+          title: item['title'] ?? '',
+          date: item['date'] ?? '',
+          time: '09:00 - 11:00',
+          color: Colors.blue,
+        )).toList(),
       ],
     );
   }
 
-  Widget _buildTimelineItem(String title, String date, String time, Color color) {
+  Widget _buildTimelineItem({
+    required String title,
+    required String date,
+    required String time,
+    required Color color,
+  }) {
     return Container(
       margin: EdgeInsets.only(bottom: 15),
       padding: EdgeInsets.all(15),

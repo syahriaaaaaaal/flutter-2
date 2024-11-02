@@ -8,17 +8,35 @@ import './login_screen.dart'; // Import the login screen
 import 'dart:ui';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'admin.dart'; // Import the admin file
+import 'package:provider/provider.dart';
+import 'providers/data_provider.dart';
 
 
 void main() {
   runApp(
-    MaterialApp(
-      title: "Tab Bar",
-      initialRoute: '/login',   
-      routes: {
-        '/login': (context) => const LoginScreen(),
-        '/home': (context) => const Home(),
-      },
+    ChangeNotifierProvider(
+      create: (context) => DataProvider(),
+      child: MaterialApp(
+        title: "Empat Mobile Apps",
+        debugShowCheckedModeBanner: false, // Menghilangkan banner debug
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            brightness: Brightness.dark,
+          ),
+        ),
+        initialRoute: '/login',   
+        routes: {
+          '/login': (context) => const LoginScreen(),
+          '/home': (context) => const Home(),
+          '/admin': (context) => const AdminPanel(),
+          '/agenda': (context) => const radio.AgendaScreen(),
+          '/info': (context) => const headset.Info(),
+          '/gallery': (context) => const hp.Gallery(),
+        },
+      ),
     ),
   );
 }
@@ -59,59 +77,10 @@ class _MyWidgetState extends State<Home> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(),
       body: _buildBody(),
       bottomNavigationBar: _buildBottomNav(),
       floatingActionButton: _buildFAB(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: Colors.transparent,
-      flexibleSpace: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withOpacity(0.1),
-                  Colors.white.withOpacity(0.05),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.apps, color: Colors.white),
-          SizedBox(width: 10),
-          Text(
-            'Empat Mobile Apps',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-              foreground: Paint()
-                ..shader = LinearGradient(
-                  colors: [Colors.white, Colors.blue.shade200],
-                ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
-            ),
-          ),
-        ],
-      ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.3),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: Icon(Icons.notifications_rounded),
-          onPressed: () {},
-        ).animate().fadeIn(delay: 300.ms),
-      ],
     );
   }
 
@@ -126,46 +95,57 @@ class _MyWidgetState extends State<Home> with SingleTickerProviderStateMixin {
             Color(0xFF0D47A1),
             Color(0xFF01579B),
           ],
+          stops: [0.0, 0.5, 1.0],
         ),
       ),
       child: Stack(
         children: [
-          // Animated background elements
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [Colors.blue.withOpacity(0.2), Colors.transparent],
-                ),
-              ),
-            ),
-          ).animate(onPlay: (controller) => controller.repeat())
-           .moveY(duration: 5.seconds, curve: Curves.easeInOut)
-           .moveX(duration: 6.seconds, curve: Curves.easeInOut),
-
-          // Main content
-          TabBarView(
-            controller: controller,
-            children: <Widget>[
-              _buildAnimatedPage(komputer.Home()),
-              _buildAnimatedPage(headset.Info()),
-              _buildAnimatedPage(radio.AgendaScreen()),
-              _buildAnimatedPage(hp.Gallery()),
-            ],
-          ),
+          _buildAnimatedBackground(),
+          _buildTabBarView(),
         ],
       ),
     );
   }
 
-    Widget _buildAnimatedPage(Widget page) {
+  Widget _buildAnimatedBackground() {
+    return Positioned(
+      top: -100,
+      right: -100,
+      child: Container(
+        width: 200,
+        height: 200,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [Colors.blue.withOpacity(0.2), Colors.transparent],
+          ),
+        ),
+      ),
+    ).animate(onPlay: (controller) => controller.repeat())
+     .moveY(duration: 5.seconds, curve: Curves.easeInOut)
+     .moveX(duration: 6.seconds, curve: Curves.easeInOut);
+  }
+
+  Widget _buildTabBarView() {
+    return TabBarView(
+      controller: controller,
+      children: <Widget>[
+        _buildAnimatedPage(komputer.Home()),
+        _buildAnimatedPage(headset.Info()),
+        _buildAnimatedPage(radio.AgendaScreen()),
+        _buildAnimatedPage(hp.Gallery()),
+      ],
+    );
+  }
+
+  Widget _buildAnimatedPage(Widget page) {
     return Container(
-      margin: EdgeInsets.all(16),
+      margin: EdgeInsets.only(
+        top: 24,
+        left: 16,
+        right: 16,
+        bottom: 16,
+      ),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
@@ -187,31 +167,11 @@ class _MyWidgetState extends State<Home> with SingleTickerProviderStateMixin {
       );
   }
 
- Widget _buildBottomNav() {
+  Widget _buildBottomNav() {
     return AnimatedBottomNavigationBar.builder(
       itemCount: iconList.length,
       tabBuilder: (int index, bool isActive) {
-        final color = isActive ? Colors.blue.shade200 : Colors.white60;
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              iconList[index],
-              size: 24,
-              color: color,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              titleList[index],
-              style: TextStyle(color: color, fontSize: 12),
-            )
-          ],
-        ).animate().scale(
-          duration: 200.ms,
-          begin: Offset(isActive ? 0.8 : 1.0, isActive ? 0.8 : 1.0),
-          end: Offset(isActive ? 1.0 : 1.0, isActive ? 1.0 : 1.0),
-        );
+        return _buildNavItem(index, isActive);
       },
       backgroundColor: Colors.black.withOpacity(0.5),
       activeIndex: _selectedIndex,
@@ -220,13 +180,35 @@ class _MyWidgetState extends State<Home> with SingleTickerProviderStateMixin {
       gapLocation: GapLocation.center,
       leftCornerRadius: 20,
       rightCornerRadius: 20,
-      onTap: (index) {
-        setState(() {
-          _selectedIndex = index;
-          controller.animateTo(index);
-        });
-      },
+      onTap: (index) => _onNavItemTapped(index),
     );
+  }
+
+  Widget _buildNavItem(int index, bool isActive) {
+    final color = isActive ? Colors.blue.shade200 : Colors.white60;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(iconList[index], size: 24, color: color),
+        const SizedBox(height: 4),
+        Text(
+          titleList[index],
+          style: TextStyle(color: color, fontSize: 12),
+        )
+      ],
+    ).animate().scale(
+      duration: 200.ms,
+      begin: Offset(isActive ? 0.8 : 1.0, isActive ? 0.8 : 1.0),
+      end: Offset(isActive ? 1.0 : 1.0, isActive ? 1.0 : 1.0),
+    );
+  }
+
+  void _onNavItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      controller.animateTo(index);
+    });
   }
 
   Widget _buildFAB() {
@@ -252,7 +234,7 @@ class _MyWidgetState extends State<Home> with SingleTickerProviderStateMixin {
             .animate(onPlay: (controller) => controller.repeat())
             .shimmer(duration: 2.seconds),
         onPressed: () {
-          // Add your action here
+          Navigator.pushNamed(context, '/admin');
         },
       ),
     ).animate()

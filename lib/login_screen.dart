@@ -13,6 +13,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _isAdmin = false;
   
   // Deklarasi dengan late
   late AnimationController _animationController;
@@ -48,9 +49,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   void _login() {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);
+      
+      // Cek kredensial admin
+      if (_usernameController.text == "admin" && 
+          _passwordController.text == "admin123") {
+        setState(() => _isAdmin = true);
+      }
+
       Future.delayed(Duration(seconds: 2), () {
         setState(() => _isLoading = false);
-        Navigator.pushReplacementNamed(context, '/home');
+        if (_isAdmin) {
+          Navigator.pushReplacementNamed(context, '/admin');
+        } else {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       });
     }
   }
@@ -159,13 +171,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       controller: _usernameController,
                                       icon: Icons.person_outline,
                                       label: 'Username',
+                                      hint: 'Masukkan username',
                                     ),
                                     const SizedBox(height: 20),
                                     _buildTextField(
                                       controller: _passwordController,
                                       icon: Icons.lock_outline,
                                       label: 'Password',
+                                      hint: 'Masukkan password',
                                       isPassword: true,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    // Tambahkan text helper
+                                    Text(
+                                      'Admin: username: admin, password: admin123',
+                                      style: TextStyle(
+                                        color: Colors.white60,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                     const SizedBox(height: 30),
                                     _buildLoginButton(),
@@ -191,6 +214,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     required TextEditingController controller,
     required IconData icon,
     required String label,
+    required String hint,
     bool isPassword = false,
   }) {
     return Container(
@@ -206,6 +230,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: Colors.white70),
           labelText: label,
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.white38),
           labelStyle: TextStyle(color: Colors.white70),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
